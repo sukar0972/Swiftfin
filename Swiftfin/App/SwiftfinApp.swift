@@ -30,7 +30,12 @@ struct SwiftfinApp: App {
                 PreferencesView {
                     WithUserAuthentication {
                         RootView()
-                            .supportedOrientations(UIDevice.isPad ? .allButUpsideDown : .portrait)
+                            .supportedOrientations(
+                                UIDevice.isMac || UIDevice.isPad ? .allButUpsideDown : .portrait
+                            )
+                            .if(UIDevice.isMac) { view in
+                                view.frame(minWidth: 720, minHeight: 520)
+                            }
                     }
                 }
             }

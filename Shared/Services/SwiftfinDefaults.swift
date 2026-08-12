@@ -286,10 +286,6 @@ extension Defaults.Keys {
             )
         }
 
-        static var videoPlayerType: Key<VideoPlayerType> {
-            UserKey("videoPlayerType", default: .swiftfin)
-        }
-
         enum Gesture {
 
             static var horizontalPanAction: Key<PanGestureAction> {

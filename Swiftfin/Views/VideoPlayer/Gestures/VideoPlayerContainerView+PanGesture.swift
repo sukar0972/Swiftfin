@@ -22,6 +22,10 @@ extension VideoPlayer.UIVideoPlayerContainerViewController {
     ) {
         guard checkGestureLock() else { return }
 
+        // Trackpad and mouse drags should operate controls directly. Avoid mapping
+        // them to the iPhone-only brightness and hidden MPVolumeView gestures.
+        guard !UIDevice.isMac else { return }
+
         if state == .began {
             containerState.timer.stop()
         }

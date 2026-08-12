@@ -7,9 +7,13 @@
 //
 
 import FactoryKit
+import PreferencesView
 import SwiftUI
 
 struct RootView: View {
+
+    @Router
+    private var router
 
     @StateObject
     private var rootCoordinator: RootCoordinator = .init()
@@ -28,6 +32,22 @@ struct RootView: View {
         .animation(.linear(duration: 0.1), value: rootCoordinator.state)
         .task {
             rootCoordinator.start()
+        }
+        .onAppear {
+            if UIDevice.isMac {
+                MacWindowController.shared.startObserving()
+            }
+        }
+        .if(UIDevice.isMac) { view in
+            view.keyCommands {
+                KeyCommandAction(
+                    title: L10n.settings,
+                    input: ",",
+                    modifierFlags: .command
+                ) {
+                    router.route(to: .settings)
+                }
+            }
         }
     }
 }

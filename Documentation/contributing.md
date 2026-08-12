@@ -11,11 +11,10 @@
 Fork the Swiftfin repo and install the necessary dependencies:
 
 ```bash
-# install Carthage, SwiftFormat, SwiftLint, and SwiftGen with Homebrew
+# install SwiftFormat, SwiftLint, and SwiftGen with Homebrew
 $ brew bundle --file Brewfile
 
 # install or update dependencies
-$ carthage update --use-xcframeworks
 ```
 
 In the event that all of the Swift Packages cannot be installed, clean the Swift Packages cache or close and reopen Xcode to restart the process.
@@ -60,7 +59,7 @@ If a Pull Request relates to an Issue, mention the issue correctly in the PR des
 [SwiftLint](https://github.com/realm/SwiftLint) enforces additional rules.
 
 The following must pass in order for a PR to be merged:
-- automated `iOS` and `tvOS` builds must succeed
+- the automated Mac Catalyst build must succeed
 - developer account cannot be attached
 - SwiftFormat linting check must pass. If this does not pass, you may need to update your version of `swiftformat`
 - SwiftLint check must pass. If this does not pass, fix the violation or add a justified `swiftlint:disable` directive
@@ -74,7 +73,7 @@ Documentation for advanced or complex features and other implementation reasonin
 
 ## Architecture
 
-Swiftfin is developed using SwiftUI. The iOS and tvOS Jellyfin clients share the same backend with each client containing their respective views. Due to this architecture, working on both clients at once may be necessary.
+Swiftfin Mac is developed using SwiftUI and Mac Catalyst.
 
 Playback is done with [VLCKit](https://code.videolan.org/videolan/VLCKit) for its great codec support. Becoming familiar with VLCKit will be necessary for video playback development and debugging.
 

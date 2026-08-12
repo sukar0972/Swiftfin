@@ -1,15 +1,6 @@
 {
-  "originHash" : "a2ea4831b4277f95b52f845ae611d252f3fc45f831a06467bc6463b283cac2e0",
+  "originHash" : "f431928ca6123ed541c332f6b223a330154ae504053e96e352d86fa9bd0d6bab",
   "pins" : [
-    {
-      "identity" : "blurhashkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/LePips/BlurHashKit",
-      "state" : {
-        "revision" : "19847aa26cdea6859694f6583ab41d3c4412afb6",
-        "version" : "2.0.0"
-      }
-    },
     {
       "identity" : "cocoalumberjack",
       "kind" : "remoteSourceControl",
@@ -152,6 +143,15 @@
       "state" : {
         "revision" : "b3c237aff54b8307440157a2f5956bdea2e76791",
         "version" : "2.31.2"
+      }
+    },
+    {
+      "identity" : "mpvkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mpvkit/MPVKit.git",
+      "state" : {
+        "revision" : "288527dffbc6d3e63cce147fc7b520c64a791603",
+        "version" : "1.0.0"
       }
     },
     {
@@ -323,24 +323,6 @@
       "state" : {
         "revision" : "f5a531fcece5d65c75397d01cf2910b31347e0b9",
         "version" : "2.13.4"
-      }
-    },
-    {
-      "identity" : "tvospicker",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ViacomInc/TVOSPicker",
-      "state" : {
-        "revision" : "90806460f3b3e7564344647241c157aeb0b27a71",
-        "version" : "0.3.0"
-      }
-    },
-    {
-      "identity" : "vlcui",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/LePips/VLCUI",
-      "state" : {
-        "revision" : "e1449ec0a5ceda8f79c3d634fdd59e16b37bc151",
-        "version" : "0.8.1"
       }
     },
     {

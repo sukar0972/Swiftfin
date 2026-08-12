@@ -63,7 +63,7 @@ extension SelectUserView {
             CenteredLazyVGrid(
                 data: userItems,
                 id: \.user.id,
-                columns: UIDevice.isPhone ? 2 : 5,
+                columns: UIDevice.isPhone ? 2 : (UIDevice.isMac ? 6 : 5),
                 spacing: EdgeInsets.edgePadding
             ) { item in
                 userGridButton(for: item)

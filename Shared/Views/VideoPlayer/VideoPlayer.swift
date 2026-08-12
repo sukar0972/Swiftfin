@@ -40,7 +40,7 @@ struct VideoPlayer: View {
     private var containerState: VideoPlayerContainerState = .init()
 
     init() {
-        self._proxy = .init(wrappedValue: VLCMediaPlayerProxy())
+        self._proxy = .init(wrappedValue: MPVMediaPlayerProxy())
     }
 
     var body: some View {
@@ -56,6 +56,16 @@ struct VideoPlayer: View {
         .onAppear {
             manager.proxy = proxy
             manager.start()
+
+            if UIDevice.isMac {
+                containerState.isPresentingOverlay = true
+                MacWindowController.shared.enterPlayerFullScreen()
+            }
+        }
+        .onDisappear {
+            if UIDevice.isMac {
+                MacWindowController.shared.restoreWindowAfterPlayer()
+            }
         }
         .prefersStatusBarHidden(!containerState.isPresentingOverlay)
         .backport

@@ -53,7 +53,7 @@ struct SearchView: View {
             )
             .edgePadding(.vertical)
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(UIDevice.isMac ? .automatic : .hidden)
     }
 
     var body: some View {

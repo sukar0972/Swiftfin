@@ -201,7 +201,7 @@ struct AboutItemGroup: ContentGroup {
                     }
                     .edgePadding(.horizontal)
                 }
-                .scrollIndicators(.hidden)
+                .scrollIndicators(UIDevice.isMac ? .automatic : .hidden)
                 .backport
                 .scrollClipDisabled()
                 #if os(tvOS)

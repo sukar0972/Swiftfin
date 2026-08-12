@@ -10,6 +10,24 @@ import SwiftUI
 
 extension VideoPlayer.PlaybackControls.Toolbar.ActionButtons {
 
+    #if os(iOS)
+    struct MacFullScreen: View {
+
+        var body: some View {
+            Button {
+                MacWindowController.shared.toggleFullScreen()
+            } label: {
+                Label(
+                    "Toggle Full Screen",
+                    systemImage: MacWindowController.shared.isFullScreen
+                        ? "arrow.down.right.and.arrow.up.left"
+                        : "arrow.up.left.and.arrow.down.right"
+                )
+            }
+        }
+    }
+    #endif
+
     struct AspectFill: View {
 
         @EnvironmentObject

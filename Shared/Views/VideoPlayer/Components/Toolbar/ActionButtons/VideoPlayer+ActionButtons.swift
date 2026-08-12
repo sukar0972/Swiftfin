@@ -101,7 +101,15 @@ extension VideoPlayer.PlaybackControls.Toolbar {
         private func view(for button: VideoPlayerActionButton) -> some View {
             switch button {
             case .aspectFill:
+                #if os(iOS)
+                if UIDevice.isMac {
+                    MacFullScreen()
+                } else {
+                    AspectFill()
+                }
+                #else
                 AspectFill()
+                #endif
             case .audio:
                 Audio()
             case .autoPlay:

@@ -14,7 +14,7 @@ extension SelectUserView {
 
         let action: () -> Void
 
-        private let columns: CGFloat = UIDevice.isPhone ? 2 : 5
+        private let columns: CGFloat = UIDevice.isPhone ? 2 : (UIDevice.isMac ? 6 : 5)
 
         @ViewBuilder
         private var imageView: some View {

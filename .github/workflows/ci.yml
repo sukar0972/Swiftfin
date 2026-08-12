@@ -15,12 +15,6 @@ jobs:
   build:
     name: "Build 🔨"
     if: github.event.pull_request.draft == false
-    strategy:
-      matrix:
-        scheme:
-          - "Swiftfin"
-          - "Swiftfin tvOS"
-
     runs-on: macos-26
 
     env:
@@ -30,25 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
       - name: Install Homebrew dependencies
         run: brew bundle --file Brewfile
-
-      - name: Cache Carthage
-        uses: actions/cache@v4
-        id: carthage-cache
-        with:
-          path: Carthage
-          key: ${{ runner.os }}-carthage-${{ hashFiles('**/Cartfile.resolved') }}
-          restore-keys: ${{ runner.os }}-carthage-
-
-      - name: Update Carthage
-        run: carthage update --use-xcframeworks --cache-builds
 
       # FIXME: caches would keep failed compiles?
 
@@ -65,6 +42,10 @@ jobs:
           max_attempts: 3
           retry_on: error
           timeout_minutes: 60
-          command: bundle exec fastlane buildLane \
-            scheme:"\"${{ matrix.scheme }}\"" \
-            xcodeVersion:${{ env.XCODE_VERSION }}
+          command: xcodebuild \
+            -project Swiftfin.xcodeproj \
+            -scheme Swiftfin \
+            -configuration Debug \
+            -destination 'platform=macOS,variant=Mac Catalyst' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

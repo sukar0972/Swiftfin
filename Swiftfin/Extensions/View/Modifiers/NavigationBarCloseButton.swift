@@ -20,7 +20,9 @@ struct NavigationBarCloseButtonModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.toolbar {
             ToolbarItemGroup(placement: .topBarLeading) {
-                if #available(iOS 26, *) {
+                if UIDevice.isMac {
+                    EmptyView()
+                } else if #available(iOS 26, *) {
                     Button(role: .close, action: action)
                         .disabled(disabled)
                 } else {

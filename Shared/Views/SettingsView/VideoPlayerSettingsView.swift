@@ -117,9 +117,11 @@ struct VideoPlayerSettingsView: View {
     #if os(iOS)
     @ViewBuilder
     private var gestureSettings: some View {
-        Section(L10n.gestures) {
-            ChevronButton(L10n.gestures) {
-                router.route(to: .gestureSettings)
+        if !UIDevice.isMac {
+            Section(L10n.gestures) {
+                ChevronButton(L10n.gestures) {
+                    router.route(to: .gestureSettings)
+                }
             }
         }
     }

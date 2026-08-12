@@ -27,9 +27,6 @@ extension DownloadTaskView {
         @ObservedObject
         var downloadTask: DownloadTask
 
-        @State
-        private var isPresentingVideoPlayerTypeError: Bool = false
-
         var body: some View {
             VStack(alignment: .leading, spacing: 10) {
 
@@ -84,29 +81,13 @@ extension DownloadTaskView {
                         }
                     case .complete:
                         Button(L10n.play) {
-                            if Defaults[.VideoPlayer.videoPlayerType] == .swiftfin {
-                                router.dismiss()
+                            router.dismiss()
 //                                    router.route(to: .videoPlayer(manager: DownloadVideoPlayerManager(downloadTask: downloadTask)))
-                            } else {
-                                isPresentingVideoPlayerTypeError = true
-                            }
                         }
                         .frame(maxWidth: 300)
                         .frame(height: 50)
                     }
                 }
-            }
-            .alert(
-                L10n.error,
-                isPresented: $isPresentingVideoPlayerTypeError
-            ) {
-                Button {
-                    isPresentingVideoPlayerTypeError = false
-                } label: {
-                    Text(L10n.dismiss)
-                }
-            } message: {
-                Text(L10n.downloadedPlayerWarning)
             }
         }
     }

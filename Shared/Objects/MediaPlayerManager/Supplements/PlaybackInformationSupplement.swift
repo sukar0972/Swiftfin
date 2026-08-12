@@ -74,7 +74,7 @@ extension PlaybackInformationSupplement {
                 .fontWeight(.semibold)
                 .padding(.vertical, 4)
 
-            LabeledContent(L10n.videoPlayer, value: Defaults[.VideoPlayer.videoPlayerType].displayTitle)
+            LabeledContent(L10n.videoPlayer, value: "libmpv")
 
             if let playMethod = viewModel.currentSession?.playMethodDisplayTitle {
                 LabeledContent(L10n.method, value: playMethod)

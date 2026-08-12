@@ -23,9 +23,7 @@ extension MediaPlayerItem {
         mediaSource _initialMediaSource: MediaSourceInfo? = nil,
         audioStreamIndex: Int? = nil,
         subtitleStreamIndex: Int? = nil,
-        videoPlayerType: VideoPlayerType = Defaults[.VideoPlayer.videoPlayerType],
         requestedBitrate: PlaybackBitrate = Defaults[.VideoPlayer.Playback.appMaximumBitrate],
-        compatibilityMode: PlaybackCompatibility = Defaults[.VideoPlayer.Playback.compatibilityMode],
         modifyItem: ((inout BaseItemDto) -> Void)? = nil
     ) async throws -> MediaPlayerItem {
 
@@ -65,9 +63,15 @@ extension MediaPlayerItem {
 
         let maxBitrate = try await MediaPlayerManager.getMaxBitrate(for: requestedBitrate)
 
+        // libmpv handles the original container, codecs, audio, and subtitles
+        // locally. Advertise an unrestricted direct-play profile so the Mac
+        // never asks the Jellyfin server to transcode or remux the source.
+        let effectiveVideoPlayerType: VideoPlayerType = .swiftfin
+        let effectiveCompatibilityMode: PlaybackCompatibility = .directPlay
+
         let deviceProfile = DeviceProfile.build(
-            for: videoPlayerType,
-            compatibilityMode: compatibilityMode,
+            for: effectiveVideoPlayerType,
+            compatibilityMode: effectiveCompatibilityMode,
             maxBitrate: maxBitrate
         )
 
@@ -79,6 +83,10 @@ extension MediaPlayerItem {
         playbackInfo.userID = userSession.user.id
         playbackInfo.audioStreamIndex = audioStreamIndex
         playbackInfo.subtitleStreamIndex = subtitleStreamIndex
+
+        playbackInfo.enableDirectPlay = true
+        playbackInfo.enableDirectStream = false
+        playbackInfo.enableTranscoding = false
 
         if !item.isLiveStream {
             playbackInfo.mediaSourceID = initialMediaSource.id

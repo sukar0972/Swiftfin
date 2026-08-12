@@ -9,7 +9,6 @@
 import Defaults
 import PreferencesView
 import SwiftUI
-import VLCUI
 
 // TODO: protect against holding down
 
@@ -28,6 +27,9 @@ extension VideoPlayer {
         @EnvironmentObject
         private var manager: MediaPlayerManager
 
+        @Router
+        private var router
+
         @Toaster
         private var toaster: ToastProxy
 
@@ -35,12 +37,45 @@ extension VideoPlayer {
             content
                 .keyCommands {
 
+                    // MARK: Close Player
+
+                    KeyCommandAction(
+                        title: L10n.close,
+                        input: UIKeyCommand.inputEscape
+                    ) {
+                        if UIDevice.isMac, MacWindowController.shared.isFullScreen {
+                            MacWindowController.shared.exitFullScreen()
+                            return
+                        }
+
+                        manager.stop()
+                        router.dismiss()
+                    }
+
+                    // MARK: Full Screen
+
+                    KeyCommandAction(
+                        title: "Toggle Full Screen",
+                        input: "f"
+                    ) {
+                        MacWindowController.shared.toggleFullScreen()
+                    }
+
+                    // MARK: Settings
+
+                    KeyCommandAction(
+                        title: L10n.settings,
+                        input: ",",
+                        modifierFlags: .command
+                    ) {
+                        router.route(to: .settings)
+                    }
+
                     // MARK: Aspect Fill
 
                     KeyCommandAction(
                         title: "Aspect Fill",
-                        input: "f",
-                        modifierFlags: .command
+                        input: "a"
                     ) { @MainActor in
                         containerState.isAspectFilled.toggle()
                     }

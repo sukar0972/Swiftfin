@@ -86,6 +86,35 @@ extension VideoPlayer {
                     .isVisible(!isScrubbing && containerState.isPresentingPlaybackControls)
             }
             .modifier(VideoPlayer.KeyCommandsModifier())
+            .if(UIDevice.isMac) { view in
+                view
+                    .contentShape(Rectangle())
+                    .onHover { isHovering in
+                        if isHovering {
+                            containerState.isPresentingOverlay = true
+                            containerState.timer.poke()
+                        }
+                    }
+                    .onTapGesture(count: 2) {
+                        MacWindowController.shared.toggleFullScreen()
+                    }
+                    .onTapGesture {
+                        containerState.isPresentingOverlay = false
+                    }
+                    .contextMenu {
+                        Button(manager.playbackRequestStatus == .playing ? L10n.pause : L10n.play) {
+                            manager.togglePlayPause()
+                        }
+
+                        Button("Toggle Full Screen") {
+                            MacWindowController.shared.toggleFullScreen()
+                        }
+
+                        Button("Aspect Fill") {
+                            containerState.isAspectFilled.toggle()
+                        }
+                    }
+            }
             .animation(.linear(duration: 0.1), value: isScrubbing)
             .animation(.bouncy(duration: 0.4), value: containerState.isPresentingSupplement)
             .animation(.bouncy(duration: 0.25), value: containerState.isPresentingOverlay)

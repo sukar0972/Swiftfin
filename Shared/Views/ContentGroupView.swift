@@ -52,7 +52,7 @@ struct ContentGroupView<Provider: ContentGroupProvider>: View {
             .ignoresSafeArea(
                 edges: contentGroupOptions.contains(.ignoreSafeAreaTop) ? [.horizontal, .top] : .horizontal
             )
-            .scrollIndicators(.hidden)
+            .scrollIndicators(UIDevice.isMac ? .automatic : .hidden)
             .refreshable {
                 await viewModel.background.refresh()
             }

@@ -55,6 +55,11 @@ extension VideoPlayer.UIVideoPlayerContainerViewController {
         }
 
         if count == 2 {
+            if UIDevice.isMac {
+                MacWindowController.shared.toggleFullScreen()
+                return
+            }
+
             handleDoubleTouchGesture(
                 location: location,
                 unitPoint: unitPoint

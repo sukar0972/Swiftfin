@@ -26,6 +26,12 @@ extension UIDevice {
         current.userInterfaceIdiom == .tv
     }
 
+    #if os(iOS)
+    static var isMac: Bool {
+        ProcessInfo.processInfo.isiOSAppOnMac || ProcessInfo.processInfo.isMacCatalystApp
+    }
+    #endif
+
     static var hasNotch: Bool {
         (UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0) > 0 &&
             isPhone
@@ -35,6 +41,10 @@ extension UIDevice {
         #if os(tvOS)
         L10n.tvOS
         #else
+        if UIDevice.isMac {
+            return L10n.macOS
+        }
+
         if UIDevice.isPad {
             return L10n.iPadOS
         } else {
@@ -46,6 +56,7 @@ extension UIDevice {
     /// - Important: Does nothing on non-iOS platforms.
     static func feedback(_ type: UINotificationFeedbackGenerator.FeedbackType) {
         #if os(iOS)
+        guard !UIDevice.isMac else { return }
         UINotificationFeedbackGenerator().notificationOccurred(type)
         #endif
     }
@@ -55,6 +66,7 @@ extension UIDevice {
     /// - Important: Does nothing on non-iOS platforms.
     static func impact(_ type: UIImpactFeedbackGenerator.FeedbackStyle) {
         #if os(iOS)
+        guard !UIDevice.isMac else { return }
         UIImpactFeedbackGenerator(style: type).impactOccurred()
         #endif
     }

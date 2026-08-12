@@ -83,7 +83,7 @@ extension ItemView {
                 }
                 .trackingFrame(for: .scrollView)
                 .ignoresSafeArea(edges: isEnhanced ? .all : .horizontal)
-                .scrollIndicators(.hidden)
+                .scrollIndicators(UIDevice.isMac ? .automatic : .hidden)
             }
         }
     }

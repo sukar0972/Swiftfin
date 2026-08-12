@@ -145,7 +145,7 @@ extension VideoPlayer.PlaybackControls {
                     translation: $currentTranslation,
                     valueDamping: isSlowScrubbing ? 0.1 : 1
                 )
-                .gesturePadding(30)
+                .gesturePadding(UIDevice.isMac ? 18 : 30)
                 .onEditingChanged { newValue in
                     isScrubbing = newValue
                 }
@@ -160,7 +160,7 @@ extension VideoPlayer.PlaybackControls {
                 }
                 .frame(maxWidth: sliderSize != .zero ? insetSliderWidth : .infinity)
                 .scaleEffect(x: isScrubbing ? xScale : 1, y: 1, anchor: .center)
-                .frame(height: isScrubbing ? 20 : 10)
+                .frame(height: UIDevice.isMac ? (isScrubbing ? 24 : 14) : (isScrubbing ? 20 : 10))
                 .foregroundStyle(manager.state == .loadingItem ? .gray : .primary)
             }
             .animation(.linear(duration: 0.05), value: scrubbedSeconds)

@@ -14,9 +14,6 @@ struct CustomDeviceProfilesView: View {
 
     @Default(.VideoPlayer.Playback.customDeviceProfileAction)
     private var customDeviceProfileAction
-    @Default(.VideoPlayer.videoPlayerType)
-    private var videoPlayerType
-
     @StoredValue(.User.customDeviceProfiles)
     private var customProfiles: [CustomDeviceProfile]
 
@@ -122,7 +119,7 @@ struct CustomDeviceProfilesView: View {
     private var defaultProfileView: some View {
         if customDeviceProfileAction == .add {
             Section(L10n.default) {
-                ForEach(Array(videoPlayerType.directPlayProfiles.enumerated()), id: \.offset) { _, profile in
+                ForEach(Array(VideoPlayerType.swiftfin.directPlayProfiles.enumerated()), id: \.offset) { _, profile in
                     Button {} label: {
                         profileView(
                             useAsTranscodingProfile: false,
@@ -134,7 +131,7 @@ struct CustomDeviceProfilesView: View {
                     .foregroundStyle(.primary, .secondary)
                 }
 
-                ForEach(Array(videoPlayerType.transcodingProfiles.enumerated()), id: \.offset) { _, profile in
+                ForEach(Array(VideoPlayerType.swiftfin.transcodingProfiles.enumerated()), id: \.offset) { _, profile in
                     Button {} label: {
                         profileView(
                             useAsTranscodingProfile: true,

@@ -101,7 +101,7 @@ struct PagingLibraryView<Library: PagingLibrary>: View where Library.Element: Li
             .proxy(gridProxy)
             .ignoresSafeArea(edges: .vertical)
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicators(UIDevice.isMac ? .automatic : .hidden)
         .withViewContext(.isListRowSeparatorVisible)
         .withViewContext(.isThumb)
         .onReceive(tabItemSelected) { event in

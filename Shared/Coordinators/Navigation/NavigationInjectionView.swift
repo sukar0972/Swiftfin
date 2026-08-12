@@ -84,15 +84,26 @@ struct NavigationInjectionView: View {
                 }
             }
         #endif // <- End
-        #if os(tvOS)
+        #if os(tvOS) || targetEnvironment(macCatalyst)
         .fullScreenCover(
             item: $coordinator.presentedFullScreen
         ) { route in
             let newCoordinator = NavigationCoordinator()
 
+            #if targetEnvironment(macCatalyst)
+            // Full-screen covers create their own hosting controller. Wrap the
+            // player so PreferencesView can install priority UIKeyCommands;
+            // otherwise Space is consumed by the currently focused button.
+            PreferencesView {
+                NavigationInjectionView(coordinator: newCoordinator) {
+                    route.destination
+                }
+            }
+            #else
             NavigationInjectionView(coordinator: newCoordinator) {
                 route.destination
             }
+            #endif
         }
         #else
         .presentation(
