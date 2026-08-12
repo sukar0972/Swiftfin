@@ -26,6 +26,15 @@ This is a native MacOS that converts Swiftfin from a shared iOS/tvOS application
 
 Other functionality has been intentionally preserved.
 
+## Download
+
+[Download the latest Swiftfin Mac beta](https://github.com/sukar0972/Swiftfin/releases/download/swiftfin-mac-v1.0.0-beta.1/Swiftfin-Mac-1.0.0-beta.1.zip)
+
+> [!WARNING]
+> Swiftfin Mac is still in beta and is not Apple-notarized. After extracting
+> the ZIP, right-click **Swiftfin Mac.app**, select **Open**, and confirm the
+> prompt.
+
 ## 📖 Documentation
 
 Swiftfin provides detailed documentation to help you understand key aspects of the app and its development approach:
