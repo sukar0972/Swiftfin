@@ -1,39 +1,30 @@
 <div align="center">
   <img alt="Swiftfin" src="./Resources/primary-wide.svg">
+</div>
 
+<div align="left">
   <h1>Swiftfin</h1>
-  <img src="https://img.shields.io/badge/iOS-16+-red"/>
-  <img src="https://img.shields.io/badge/tvOS-26+-red"/>
+  <img src="https://img.shields.io/badge/Mac-16+-red"/>
   <img src="https://img.shields.io/badge/Jellyfin-10.11-9962be"/>
   
   <a href="https://translate.jellyfin.org/engage/swiftfin/">
     <img src="https://translate.jellyfin.org/widgets/swiftfin/-/svg-badge.svg"/>
   </a>
-  <a href="https://matrix.to/#/#jellyfin:matrix.org">
-    <img src="https://img.shields.io/matrix/jellyfin:matrix.org">
-  </a>
-  <a href="https://discord.gg/zHBxVSXdBV">
-    <img src="https://img.shields.io/badge/Talk%20on-Discord-brightgreen">
-  </a>
 </div>
 
 <p align="center">
-  <b>Swiftfin</b> is a modern video client for the <a href="https://github.com/jellyfin/jellyfin">Jellyfin</a> media server. Made using Swift to maximize direct play with the power of <b>VLC</b> and look <b>native</b> on all classes of Apple devices.
+  <b>Swiftfin</b> is a modern video client for the <a href="https://github.com/jellyfin/jellyfin">Jellyfin</a> media server. Made using Swift to maximize direct play on Mac.
 </p>
 
-## ⚡️ Download
+## About this fork
 
-<a href="https://apps.apple.com/us/app/swiftfin/id1604098728">
-  <img height=75 alt="Download on the Apple App Store" src="./Resources/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg"/>
-</a>
+This is a native MacOS that converts Swiftfin from a shared iOS/tvOS application into a standalone Mac Catalyst app called Swiftfin Mac.
 
-## 🛠️ TestFlight
+- Replaced MobileVLCKit/VLC with libmpv through MPVKit
+- Removed the native AVPlayer playback option
+- Enforced Jellyfin Direct Play only
 
-Use the TestFlight version to test new features and bug fixes before being published to the App Store. We are grateful for your time and resources for reporting new bugs.
-
-<a href="https://testflight.apple.com/join/SqNPfdxq">
-  <img height=75 alt="Get the beta on TestFlight" src="./Resources/testflight.svg"/>
-</a>
+Other functionality has been intentionally preserved.
 
 ## 📖 Documentation
 
