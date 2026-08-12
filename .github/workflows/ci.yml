@@ -37,12 +37,9 @@ jobs:
       #     restore-keys: ${{ runner.os }}-${{ matrix.scheme }}-spm-
 
       - name: Build
-        uses: nick-fields/retry@v2
-        with:
-          max_attempts: 3
-          retry_on: error
-          timeout_minutes: 60
-          command: xcodebuild \
+        timeout-minutes: 60
+        run: |
+          xcodebuild \
             -project Swiftfin.xcodeproj \
             -scheme Swiftfin \
             -configuration Debug \
