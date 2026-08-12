@@ -44,5 +44,6 @@ jobs:
             -scheme Swiftfin \
             -configuration Debug \
             -destination 'platform=macOS,variant=Mac Catalyst' \
+            -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             build
