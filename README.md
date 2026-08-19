@@ -28,7 +28,7 @@ Other functionality has been intentionally preserved.
 
 ## Download
 
-[Download the latest Swiftfin Mac beta](https://github.com/sukar0972/Swiftfin/releases/download/swiftfin-mac-v1.0.0-beta.1/Swiftfin-Mac-1.0.0-beta.1.zip)
+[Download the latest Swiftfin Mac beta](https://github.com/sukar0972/Swiftfin/releases/download/swiftfin-mac-v1.0.0-beta.2/Swiftfin-Mac-1.0.0-beta.2.zip)
 
 > [!WARNING]
 > Swiftfin Mac is still in beta and is not Apple-notarized. After extracting
