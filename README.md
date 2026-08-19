@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="Swiftfin" src="./Resources/primary-wide.svg">
+  <img alt="Swiftfin for Mac" src="./Resources/primary-wide.svg">
 </div>
 
 <div align="left">
