@@ -29,6 +29,10 @@ struct VideoPlayer: View {
     private var audioOffset: Duration = .zero
     @State
     private var isBeingDismissedByTransition = false
+    @State
+    private var macPlayerSessionID: UUID?
+    @State
+    private var macWindowedAspectFill: Bool?
 
     // TODO: move behavior to `PlaybackProgress`?
     @State
@@ -49,6 +53,7 @@ struct VideoPlayer: View {
             manager: manager
         ) {
             proxy.videoPlayerBody
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .eraseToAnyView()
         } playbackControls: {
             PlaybackControls()
@@ -59,15 +64,32 @@ struct VideoPlayer: View {
 
             if UIDevice.isMac {
                 containerState.isPresentingOverlay = true
-                MacWindowController.shared.enterPlayerFullScreen()
+                macPlayerSessionID = MacWindowController.shared.beginPlayerSession()
+                containerState.macPlayerSessionID = macPlayerSessionID
+                MacWindowController.shared.setPlayerCursorHidden(false, sessionID: macPlayerSessionID)
+                MacWindowController.shared.setPlaybackActive(
+                    manager.playbackRequestStatus == .playing,
+                    sessionID: macPlayerSessionID
+                )
             }
         }
         .onDisappear {
             if UIDevice.isMac {
-                MacWindowController.shared.restoreWindowAfterPlayer()
+                MacWindowController.shared.endPlayerSession(macPlayerSessionID)
+                containerState.macPlayerSessionID = nil
             }
         }
         .prefersStatusBarHidden(!containerState.isPresentingOverlay)
+        .backport
+        .onChange(of: containerState.isPresentingOverlay) { _, isPresenting in
+            guard UIDevice.isMac else { return }
+            MacWindowController.shared.setPlayerCursorHidden(!isPresenting, sessionID: macPlayerSessionID)
+        }
+        .backport
+        .onChange(of: manager.playbackRequestStatus) { _, status in
+            guard UIDevice.isMac else { return }
+            MacWindowController.shared.setPlaybackActive(status == .playing, sessionID: macPlayerSessionID)
+        }
         .backport
         .onChange(of: audioOffset) { _, newValue in
             if let proxy = proxy as? MediaPlayerOffsetConfigurable {
@@ -79,6 +101,16 @@ struct VideoPlayer: View {
             UIView.animate(withDuration: 0.2) {
                 proxy.setAspectFill(newValue)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .swiftfinMacDidEnterFullScreen)) { _ in
+            guard UIDevice.isMac else { return }
+            macWindowedAspectFill = containerState.isAspectFilled
+            containerState.isAspectFilled = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .swiftfinMacDidExitFullScreen)) { _ in
+            guard UIDevice.isMac, let macWindowedAspectFill else { return }
+            containerState.isAspectFilled = macWindowedAspectFill
+            self.macWindowedAspectFill = nil
         }
         .backport
         .onChange(of: containerState.isScrubbing) { _, newValue in
@@ -113,7 +145,9 @@ struct VideoPlayer: View {
             manager.stop()
         }
         .onReceive(manager.$playbackItem) { newItem in
-            containerState.isAspectFilled = false
+            if !UIDevice.isMac || macWindowedAspectFill == nil {
+                containerState.isAspectFilled = false
+            }
             audioOffset = .zero
             subtitleOffset = .zero
 

@@ -43,8 +43,12 @@ extension VideoPlayer {
                         title: L10n.close,
                         input: UIKeyCommand.inputEscape
                     ) {
-                        if UIDevice.isMac, MacWindowController.shared.isFullScreen {
-                            MacWindowController.shared.exitFullScreen()
+                        if UIDevice.isMac {
+                            // AppKit owns Escape for native fullscreen. Catalyst
+                            // delivers this command after AppKit has started (or
+                            // completed) the exit, so issuing another toggle here
+                            // would immediately re-enter fullscreen.
+                            _ = MacWindowController.shared.consumeNativeFullScreenEscape()
                             return
                         }
 

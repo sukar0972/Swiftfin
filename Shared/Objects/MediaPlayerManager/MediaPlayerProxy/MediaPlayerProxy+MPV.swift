@@ -325,10 +325,15 @@ private struct MPVPlayerView: UIViewRepresentable {
 private final class MPVRenderView: UIView {
     private let metalLayer: CAMetalLayer
 
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+    }
+
     init(metalLayer: CAMetalLayer) {
         self.metalLayer = metalLayer
         super.init(frame: .zero)
         backgroundColor = .black
+        metalLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         layer.addSublayer(metalLayer)
     }
 
@@ -339,11 +344,14 @@ private final class MPVRenderView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         metalLayer.frame = bounds
         metalLayer.drawableSize = CGSize(
             width: bounds.width * (window?.screen.scale ?? UIScreen.main.scale),
             height: bounds.height * (window?.screen.scale ?? UIScreen.main.scale)
         )
+        CATransaction.commit()
     }
 }
 

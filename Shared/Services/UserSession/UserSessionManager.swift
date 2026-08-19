@@ -335,6 +335,21 @@ final class UserSessionManager: ObservableObject {
             throw UserSessionError.invalidStoredSession(userID: userId)
         }
 
+        // The stored user record can outlive its Keychain item, especially
+        // when switching between development, ad-hoc, and release signatures.
+        // Treat that as a signed-out session instead of constructing a client
+        // with an empty token (or trapping in Debug builds).
+        guard let accessToken = keychain.get("\(user.id)-accessToken"),
+              !accessToken.isEmpty
+        else {
+            Defaults[.lastSignedInUserID] = .signedOut
+            logger.warning(
+                "Stored user has no accessible access token; returning to sign in",
+                metadata: ["userID": .string(user.id)]
+            )
+            return nil
+        }
+
         return .init(
             server: server,
             user: user

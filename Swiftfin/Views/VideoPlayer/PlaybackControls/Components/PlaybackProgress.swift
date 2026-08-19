@@ -58,9 +58,13 @@ extension VideoPlayer.PlaybackControls {
         private var previewXOffset: CGFloat {
             guard sliderSize.width.isFinite, sliderSize.width > 0 else { return 0 }
 
-            let videoWidth = 85 * videoSizeAspectRatio
+            let videoWidth = previewHeight * videoSizeAspectRatio
             let p = (sliderSize.width * scrubbedProgress) - (videoWidth / 2)
             return clamp(p, min: 0, max: max(0, sliderSize.width - videoWidth))
+        }
+
+        private var previewHeight: CGFloat {
+            UIDevice.isMac ? 170 : 85
         }
 
         private var scrubbedProgress: Double {
@@ -189,10 +193,10 @@ extension VideoPlayer.PlaybackControls {
                 if isScrubbing, let previewImageProvider = manager.playbackItem?.previewImageProvider {
                     PreviewImageView(previewImageProvider: previewImageProvider)
                         .aspectRatio(videoSizeAspectRatio, contentMode: .fit)
-                        .frame(height: 85)
+                        .frame(height: previewHeight)
                         .posterBorder()
                         .cornerRadius(ratio: 1 / 30, of: \.width)
-                        .offset(x: previewXOffset, y: -100)
+                        .offset(x: previewXOffset, y: -(previewHeight + 15))
                 }
             }
             .overlay(alignment: .bottom) {

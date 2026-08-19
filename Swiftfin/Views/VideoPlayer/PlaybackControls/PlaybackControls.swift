@@ -89,10 +89,20 @@ extension VideoPlayer {
             .if(UIDevice.isMac) { view in
                 view
                     .contentShape(Rectangle())
-                    .onHover { isHovering in
-                        if isHovering {
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active:
+                            MacWindowController.shared.setPointerInsidePlayer(
+                                true,
+                                sessionID: containerState.macPlayerSessionID
+                            )
                             containerState.isPresentingOverlay = true
                             containerState.timer.poke()
+                        case .ended:
+                            MacWindowController.shared.setPointerInsidePlayer(
+                                false,
+                                sessionID: containerState.macPlayerSessionID
+                            )
                         }
                     }
                     .onTapGesture(count: 2) {

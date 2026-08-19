@@ -57,6 +57,8 @@
 	<string>${PRODUCT_NAME} uses your location to identify the current Wi-Fi network.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>${PRODUCT_NAME} uses the microphone to listen for ultrasonic tokens when pairing with nearby Cast devices.</string>
+	<key>NSPrefersDisplaySafeAreaCompatibilityMode</key>
+	<false/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>NotoSansCJK-Regular.ttc</string>
