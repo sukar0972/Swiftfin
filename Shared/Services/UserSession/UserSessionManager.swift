@@ -117,6 +117,11 @@ final class UserSessionManager: ObservableObject {
         }
     }
 
+    func hasSavedAccessToken(userID: String) -> Bool {
+        guard let token = keychain.get("\(userID)-accessToken") else { return false }
+        return !token.isEmpty
+    }
+
     @MainActor
     func signOut(reason: SignOutReason) async {
         guard currentSession != nil else { return }

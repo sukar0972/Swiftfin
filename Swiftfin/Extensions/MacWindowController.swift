@@ -7,63 +7,71 @@
 //
 
 #if os(iOS)
+import Combine
 import UIKit
 
 extension Notification.Name {
+    static let swiftfinMacWillEnterFullScreen = Notification.Name("SwiftfinMacWillEnterFullScreen")
     static let swiftfinMacDidEnterFullScreen = Notification.Name("SwiftfinMacDidEnterFullScreen")
     static let swiftfinMacDidExitFullScreen = Notification.Name("SwiftfinMacDidExitFullScreen")
 }
 
 /// Controls the native macOS window that hosts the Catalyst scene.
 @MainActor
-final class MacWindowController {
+final class MacWindowController: ObservableObject {
 
     static let shared = MacWindowController()
 
     private static let windowFrameAutosaveName = "SwiftfinMacMainWindow"
 
-    private enum Transition {
-        case entering
-        case exiting
-        case idle
-    }
-
     private var isPlayerCursorHidden = false
     private var isPointerInsidePlayer = false
     private var isWindowMain = true
     private var hasStartedObserving = false
-    private var consumesNextEscape = false
+    private var lastNativeFullScreenExitTime: TimeInterval?
+    private let playerFullScreen = MacPlayerFullScreen()
     private var playerSessionID: UUID?
     private var playerWantsCursorHidden = false
     private var playbackActivity: NSObjectProtocol?
     private var playerHiddenTabBars: [UITabBar] = []
     private var observers: [NSObjectProtocol] = []
     private weak var trackedWindow: NSObject?
-    private var transition: Transition = .idle
 
+    @Published
     private(set) var isFullScreen = false
+    @Published
+    private(set) var isPlayerFullScreen = false
 
     private init() {
         guard ProcessInfo.processInfo.isMacCatalystApp else { return }
 
+        observe("NSWindowWillEnterFullScreenNotification") { controller in
+            controller.playerFullScreen.nativeWillEnter()
+            NotificationCenter.default.post(name: .swiftfinMacWillEnterFullScreen, object: nil)
+        }
         observe("NSWindowDidEnterFullScreenNotification") { controller in
             controller.isFullScreen = true
-            controller.transition = .idle
-            controller.consumesNextEscape = true
             NotificationCenter.default.post(name: .swiftfinMacDidEnterFullScreen, object: nil)
+            let shouldExit = controller.playerFullScreen.nativeDidEnter()
+            controller.isPlayerFullScreen = controller.playerFullScreen.isActive
             controller.configureWindowAppearanceAndRestoration(restoreFrame: false)
             // Catalyst may rebuild its tab bar while moving into the new Space.
             if controller.playerSessionID != nil {
                 controller.hideTabBarForPlayer()
                 controller.setHostToolbarHidden(true)
             }
+            if shouldExit {
+                controller.exitPlayerFullScreen()
+            }
         }
         observe("NSWindowWillExitFullScreenNotification") { controller in
-            controller.transition = .exiting
+            controller.playerFullScreen.nativeWillExit()
         }
         observe("NSWindowDidExitFullScreenNotification") { controller in
             controller.isFullScreen = false
-            controller.transition = .idle
+            controller.playerFullScreen.nativeDidExit()
+            controller.isPlayerFullScreen = false
+            controller.lastNativeFullScreenExitTime = ProcessInfo.processInfo.systemUptime
             NotificationCenter.default.post(name: .swiftfinMacDidExitFullScreen, object: nil)
             controller.configureWindowAppearanceAndRestoration(restoreFrame: false)
             if controller.playerSessionID != nil {
@@ -72,10 +80,12 @@ final class MacWindowController {
             }
         }
         observe("NSWindowDidFailToEnterFullScreenNotification") { controller in
-            controller.transition = .idle
+            controller.playerFullScreen.nativeDidExit()
+            controller.isPlayerFullScreen = false
+            NotificationCenter.default.post(name: .swiftfinMacDidExitFullScreen, object: nil)
         }
         observe("NSWindowDidFailToExitFullScreenNotification") { controller in
-            controller.transition = .idle
+            controller.playerFullScreen.nativeDidFailToExit()
         }
         observe("NSWindowDidBecomeMainNotification") { controller in
             controller.isWindowMain = true
@@ -100,7 +110,6 @@ final class MacWindowController {
             guard let self else { return }
             MainActor.assumeIsolated {
                 guard let notificationWindow = notification.object as? NSObject else { return }
-
                 // Catalyst can replace the AppKit host during a fullscreen
                 // transition, so its fullscreen lifecycle notification is the
                 // authoritative handoff. Ordinary main-window notifications
@@ -138,6 +147,8 @@ final class MacWindowController {
 
     @discardableResult
     private func configureWindowAppearanceAndRestoration(restoreFrame: Bool) -> Bool {
+        // AppKit owns chrome and geometry throughout a native Space transition.
+        guard playerFullScreen.transition == .idle else { return true }
         configureCatalystTitlebar()
         guard let window = activeHostWindow() else { return false }
 
@@ -145,7 +156,9 @@ final class MacWindowController {
         // full-size content mask then extends UIKit beneath the remaining
         // transparent traffic-light region.
         if let styleMask = window.value(forKey: "styleMask") as? NSNumber {
-            window.setValue(NSNumber(value: styleMask.uintValue | (1 << 15)), forKey: "styleMask")
+            if styleMask.uintValue & (1 << 15) == 0 {
+                window.setValue(NSNumber(value: styleMask.uintValue | (1 << 15)), forKey: "styleMask")
+            }
         }
         window.setValue(true, forKey: "titlebarAppearsTransparent")
         window.setValue("", forKey: "title")
@@ -207,8 +220,8 @@ final class MacWindowController {
         hideTabBarForPlayer()
         setHostToolbarHidden(true)
 
-        // Playback stays in the current window state. Native macOS full screen
-        // is entered only when the user explicitly requests it.
+        // Playback starts in the current window state. A player that starts in
+        // an existing fullscreen Space must leave that Space intact on close.
         let sessionID = UUID()
         playerSessionID = sessionID
         isPointerInsidePlayer = false
@@ -260,47 +273,71 @@ final class MacWindowController {
 
     @discardableResult
     func exitFullScreen() -> Bool {
-        synchronizeWithWindow()
         guard UIDevice.isMac else { return false }
-
-        // Consume Escape for the duration of either native transition. This
-        // prevents the same key press from falling through to player dismissal
-        // while AppKit is moving the Catalyst window between Spaces.
-        guard transition == .idle else { return true }
+        if exitPlayerFullScreen() {
+            return true
+        }
+        synchronizeWithWindow()
+        guard playerFullScreen.transition == .idle else { return true }
         guard isFullScreen else { return false }
 
-        if sendFullScreenAction() {
-            transition = .exiting
-            consumesNextEscape = false
+        playerFullScreen.nativeWillExit()
+        if !sendFullScreenAction() {
+            playerFullScreen.nativeDidFailToExit()
         }
         return true
     }
 
-    /// Returns whether Escape belongs to AppKit's native fullscreen exit.
-    /// This never sends a fullscreen action: AppKit processes Escape before
-    /// Catalyst delivers the corresponding UIKeyCommand.
-    func consumeNativeFullScreenEscape() -> Bool {
-        synchronizeWithWindow()
+    /// Escape first leaves player fullscreen. A native exit that AppKit has
+    /// already started must not also dismiss playback on the same key press.
+    func handlePlayerEscape() -> Bool {
         guard UIDevice.isMac else { return false }
-
-        guard consumesNextEscape || isFullScreen || transition == .exiting else { return false }
-        consumesNextEscape = false
-        return true
+        if exitPlayerFullScreen() {
+            return true
+        }
+        guard playerFullScreen.transition == .idle else { return true }
+        if let lastNativeFullScreenExitTime,
+           ProcessInfo.processInfo.systemUptime - lastNativeFullScreenExitTime < 0.5
+        {
+            self.lastNativeFullScreenExitTime = nil
+            return true
+        }
+        return false
     }
 
-    func toggleFullScreen() {
+    func togglePlayerFullScreen() {
         synchronizeWithWindow()
-        guard UIDevice.isMac, transition == .idle else { return }
-        if isFullScreen {
-            exitFullScreen()
-        } else if sendFullScreenAction() {
-            transition = .entering
-            consumesNextEscape = true
+        guard UIDevice.isMac, playerFullScreen.transition == .idle else { return }
+
+        if exitPlayerFullScreen() {
+            return
         }
+        let reuseNativeFullScreen = isFullScreen
+        if playerFullScreen.enter(isNativeFullScreen: reuseNativeFullScreen, toggle: sendFullScreenAction) {
+            isPlayerFullScreen = true
+            if reuseNativeFullScreen {
+                NotificationCenter.default.post(name: .swiftfinMacWillEnterFullScreen, object: nil)
+                NotificationCenter.default.post(name: .swiftfinMacDidEnterFullScreen, object: nil)
+            }
+        } else {
+            NotificationCenter.default.post(name: .swiftfinMacDidExitFullScreen, object: nil)
+        }
+    }
+
+    @discardableResult
+    private func exitPlayerFullScreen() -> Bool {
+        guard playerFullScreen.exit(toggle: sendFullScreenAction) else { return false }
+        isPlayerFullScreen = playerFullScreen.isActive
+        synchronizeWithWindow()
+        if playerFullScreen.transition == .idle {
+            NotificationCenter.default.post(name: .swiftfinMacDidExitFullScreen, object: nil)
+        }
+        return true
     }
 
     func endPlayerSession(_ sessionID: UUID?) {
-        guard playerSessionID == sessionID else { return }
+        guard let sessionID, playerSessionID == sessionID else { return }
+        exitPlayerFullScreen()
         setPlaybackActive(false, sessionID: sessionID)
         playerWantsCursorHidden = false
         isPointerInsidePlayer = false
@@ -329,14 +366,18 @@ final class MacWindowController {
         }
     }
 
-    private func hostWindow() -> NSObject? {
+    private func hostApplication() -> NSObject? {
         guard let applicationClass = NSClassFromString("NSApplication") as? NSObject.Type,
               let application = applicationClass
                   .perform(NSSelectorFromString("sharedApplication"))?
                   .takeUnretainedValue() as? NSObject
         else { return nil }
 
-        return application.value(forKey: "keyWindow") as? NSObject
+        return application
+    }
+
+    private func hostWindow() -> NSObject? {
+        hostApplication()?.value(forKey: "keyWindow") as? NSObject
     }
 
     private func activeHostWindow() -> NSObject? {
@@ -364,19 +405,10 @@ final class MacWindowController {
         // more reliable than assuming every AppKit notification was observed,
         // especially while Catalyst moves the window into another Space.
         if let styleMask = window.value(forKey: "styleMask") as? NSNumber {
-            isFullScreen = (styleMask.uintValue & (1 << 14)) != 0
-
-            // Fullscreen notifications can be skipped while Catalyst replaces
-            // or reparents its host window. Treat the live AppKit style mask as
-            // completion of the pending transition so the next user action is
-            // never ignored by a stale transition guard.
-            switch transition {
-            case .entering where isFullScreen,
-                 .exiting where !isFullScreen:
-                transition = .idle
-            default:
-                break
-            }
+            let isNativeFullScreen = (styleMask.uintValue & (1 << 14)) != 0
+            isFullScreen = isNativeFullScreen
+            // The style bit can change before the Space animation completes.
+            // Only lifecycle completion notifications release the input guard.
         }
     }
 

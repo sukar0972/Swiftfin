@@ -11,6 +11,7 @@ import FactoryKit
 import Foundation
 import JellyfinAPI
 import KeychainSwift
+import Logging
 import Pulse
 import UIKit
 
@@ -47,6 +48,20 @@ extension UserState {
         }
         nonmutating set {
             StoredValues[.User.data(id: id)] = newValue
+        }
+    }
+
+    func storeAccessToken(_ token: String) throws {
+        let keychain = Container.shared.keychainService()
+        guard !token.isEmpty,
+              keychain.set(token, forKey: "\(id)-accessToken"),
+              keychain.get("\(id)-accessToken") == token
+        else {
+            Logger.swiftfin().error(
+                "Unable to save user access token",
+                metadata: ["keychainStatus": .stringConvertible(keychain.lastResultCode)]
+            )
+            throw ErrorMessage(L10n.unknownError)
         }
     }
 

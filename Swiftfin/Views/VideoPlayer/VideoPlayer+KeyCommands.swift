@@ -10,8 +10,6 @@ import Defaults
 import PreferencesView
 import SwiftUI
 
-// TODO: protect against holding down
-
 extension VideoPlayer {
 
     struct KeyCommandsModifier: ViewModifier {
@@ -41,14 +39,10 @@ extension VideoPlayer {
 
                     KeyCommandAction(
                         title: L10n.close,
-                        input: UIKeyCommand.inputEscape
+                        input: UIKeyCommand.inputEscape,
+                        allowsRepeat: false
                     ) {
-                        if UIDevice.isMac {
-                            // AppKit owns Escape for native fullscreen. Catalyst
-                            // delivers this command after AppKit has started (or
-                            // completed) the exit, so issuing another toggle here
-                            // would immediately re-enter fullscreen.
-                            _ = MacWindowController.shared.consumeNativeFullScreenEscape()
+                        if UIDevice.isMac, MacWindowController.shared.handlePlayerEscape() {
                             return
                         }
 
@@ -60,10 +54,15 @@ extension VideoPlayer {
 
                     KeyCommandAction(
                         title: "Toggle Full Screen",
-                        input: "f"
+                        input: "f",
+                        allowsRepeat: false
                     ) {
-                        MacWindowController.shared.toggleFullScreen()
+                        MacWindowController.shared.togglePlayerFullScreen()
                     }
+
+                    // Control–Command–F belongs to macOS's native window
+                    // fullscreen command. Registering it here also starts a
+                    // player transition while AppKit is changing Spaces.
 
                     // MARK: Settings
 

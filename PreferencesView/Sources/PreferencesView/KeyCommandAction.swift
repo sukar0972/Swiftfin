@@ -14,6 +14,7 @@ public struct KeyCommandAction {
     let subtitle: String?
     let input: String
     let modifierFlags: UIKeyModifierFlags
+    let allowsRepeat: Bool
     let action: () -> Void
 
     public init(
@@ -21,12 +22,14 @@ public struct KeyCommandAction {
         subtitle: String? = nil,
         input: String,
         modifierFlags: UIKeyModifierFlags = [],
+        allowsRepeat: Bool = true,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.subtitle = subtitle
         self.input = input
         self.modifierFlags = modifierFlags
+        self.allowsRepeat = allowsRepeat
         self.action = action
     }
 }

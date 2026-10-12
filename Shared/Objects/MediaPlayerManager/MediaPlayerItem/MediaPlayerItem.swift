@@ -197,6 +197,12 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
         }
     }
 
+    /// Installs the loaded player's IDs, including asynchronously loaded sidecars.
+    func setPlayerTrackIndexes(_ indexes: MediaTrackIndexMap) {
+        indexMap = indexes
+        externalSubtitlesResolved = true
+    }
+
     /// Get subtitle mapped subtitle track indexes from `playbackChildren`
     func getSubtitleIndexes(subtitleTracks: [(index: Int, title: String)]) {
         guard !externalSubtitlesResolved else { return }

@@ -203,6 +203,7 @@ final class UserSignInViewModel: ObservableObject {
         let userState = user.state.state
 
         let savedUserState = userState
+        try savedUserState.storeAccessToken(user.state.accessToken)
         var users = StoredValues[.User.users]
         users.removeAll { $0.id == savedUserState.id }
         users.append(savedUserState)
@@ -225,7 +226,6 @@ final class UserSignInViewModel: ObservableObject {
         }
 
         savedUserState.accessPolicy = accessPolicy
-        savedUserState.accessToken = user.state.accessToken
         savedUserState.data = user.data
 
         if let evaluatedPinPolicy = evaluatedPolicy as? PinEvaluatedUserAccessPolicy {
@@ -262,8 +262,8 @@ final class UserSignInViewModel: ObservableObject {
             }
         }
 
-        if replaceForAccessToken {
-            user.state.state.accessToken = user.state.accessToken
+        if replaceForAccessToken || !Container.shared.userSessionManager().hasSavedAccessToken(userID: user.state.state.id) {
+            try user.state.state.storeAccessToken(user.state.accessToken)
         }
 
         events.send(.saved(user.state.state))

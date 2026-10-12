@@ -388,6 +388,13 @@ struct SelectUserView: View {
             case let .signedIn(user):
                 Task { @MainActor in
                     do {
+                        if !userSessionManager.hasSavedAccessToken(userID: user.id) {
+                            guard let server = viewModel.servers.keys.first(where: { $0.id == user.serverID }) else {
+                                throw UserSessionError.invalidStoredSession(userID: user.id)
+                            }
+                            router.route(to: .userSignIn(server: server))
+                            return
+                        }
                         try await userSessionManager.signIn(userID: user.id)
                         UIDevice.feedback(.success)
                     } catch {

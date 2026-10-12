@@ -59,13 +59,21 @@ struct VideoPlayer: View {
             PlaybackControls()
         }
         .onAppear {
+            // Own the player presentation before starting mpv, which can
+            // deliver callbacks while the first player layout is appearing.
+            if UIDevice.isMac {
+                macPlayerSessionID = MacWindowController.shared.beginPlayerSession()
+                containerState.macPlayerSessionID = macPlayerSessionID
+            }
             manager.proxy = proxy
             manager.start()
 
             if UIDevice.isMac {
                 containerState.isPresentingOverlay = true
-                macPlayerSessionID = MacWindowController.shared.beginPlayerSession()
-                containerState.macPlayerSessionID = macPlayerSessionID
+                if MacWindowController.shared.isFullScreen {
+                    macWindowedAspectFill = containerState.isAspectFilled
+                    containerState.isAspectFilled = true
+                }
                 MacWindowController.shared.setPlayerCursorHidden(false, sessionID: macPlayerSessionID)
                 MacWindowController.shared.setPlaybackActive(
                     manager.playbackRequestStatus == .playing,
@@ -98,13 +106,19 @@ struct VideoPlayer: View {
         }
         .backport
         .onChange(of: containerState.isAspectFilled) { _, newValue in
-            UIView.animate(withDuration: 0.2) {
+            if UIDevice.isMac {
                 proxy.setAspectFill(newValue)
+            } else {
+                UIView.animate(withDuration: 0.2) {
+                    proxy.setAspectFill(newValue)
+                }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .swiftfinMacDidEnterFullScreen)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: .swiftfinMacWillEnterFullScreen)) { _ in
             guard UIDevice.isMac else { return }
-            macWindowedAspectFill = containerState.isAspectFilled
+            if macWindowedAspectFill == nil {
+                macWindowedAspectFill = containerState.isAspectFilled
+            }
             containerState.isAspectFilled = true
         }
         .onReceive(NotificationCenter.default.publisher(for: .swiftfinMacDidExitFullScreen)) { _ in
@@ -153,6 +167,10 @@ struct VideoPlayer: View {
 
             // TODO: move to container view
             containerState.scrubbedSeconds.value = newItem?.baseItem.startSeconds ?? .zero
+        }
+        .onReceive(manager.secondsBox.$value) { seconds in
+            guard !containerState.isScrubbing else { return }
+            containerState.scrubbedSeconds.value = seconds
         }
         .onReceive(manager.$state) { newState in
             if newState == .stopped, !isBeingDismissedByTransition {

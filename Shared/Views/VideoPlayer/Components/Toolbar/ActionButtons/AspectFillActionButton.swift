@@ -13,13 +13,16 @@ extension VideoPlayer.PlaybackControls.Toolbar.ActionButtons {
     #if os(iOS)
     struct MacFullScreen: View {
 
+        @ObservedObject
+        private var windowController = MacWindowController.shared
+
         var body: some View {
             Button {
-                MacWindowController.shared.toggleFullScreen()
+                windowController.togglePlayerFullScreen()
             } label: {
                 Label(
                     "Toggle Full Screen",
-                    systemImage: MacWindowController.shared.isFullScreen
+                    systemImage: windowController.isPlayerFullScreen
                         ? "arrow.down.right.and.arrow.up.left"
                         : "arrow.up.left.and.arrow.down.right"
                 )

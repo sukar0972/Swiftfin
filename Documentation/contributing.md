@@ -42,6 +42,18 @@ You can change the `PRODUCT_BUNDLE_IDENTIFIER` value to have multiple builds of 
 
 Swiftfin is built using the Xcode version pinned in our [CI workflow](https://github.com/jellyfin/Swiftfin/blob/main/.github/workflows/ci.yml#L27). This is the recommended version of Xcode for development.
 
+On Xcode 27, CoreStore 9.3.0 needs a local workaround for an ambiguous typed-throws overload. Resolve packages, apply the checked-in script, then build using the same derived-data directory:
+
+```bash
+xcodebuild -project Swiftfin.xcodeproj -scheme Swiftfin -derivedDataPath build/mac -resolvePackageDependencies
+python3 Scripts/fix-corestore-xcode27.py build/mac/SourcePackages/checkouts/CoreStore
+xcodebuild -project Swiftfin.xcodeproj -scheme Swiftfin -derivedDataPath build/mac \
+  -configuration Release -destination 'platform=macOS,variant=Mac Catalyst' \
+  -skipMacroValidation -disableAutomaticPackageResolution CODE_SIGNING_ALLOWED=NO build
+```
+
+This unsigned build is only for compilation checks. For an app that can log in, configure the app target's development team and automatic signing in Xcode, then omit `CODE_SIGNING_ALLOWED=NO`. The matching Mac profile and Xcode-generated Keychain entitlements must be embedded in the app; signing the unsigned output without those entitlements prevents token storage. Reapply the workaround if Xcode recreates the CoreStore checkout.
+
 ### Testing
 
 Swiftfin can be tested using Xcode's built-in Simulator or on real hardware. See Apple's guide on [Running your app in Simulator or on a device](https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device/) for instructions on both approaches.

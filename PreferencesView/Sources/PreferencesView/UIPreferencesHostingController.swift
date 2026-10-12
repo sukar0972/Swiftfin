@@ -56,7 +56,7 @@ public class UIPreferencesHostingController: UIHostingController<AnyView> {
 
     private var _keyCommandActions: [KeyCommandAction] = [] {
         willSet {
-            _keyCommands = newValue.map { action in
+            _keyCommands = newValue.filter(\.allowsRepeat).map { action in
                 let keyCommand = UIKeyCommand(
                     title: action.title,
                     action: #selector(keyCommandHit),
@@ -83,6 +83,36 @@ public class UIPreferencesHostingController: UIHostingController<AnyView> {
         guard let action = _keyCommandActions
             .first(where: { $0.input == keyCommand.input && $0.modifierFlags == keyCommand.modifierFlags }) else { return }
         action.action()
+    }
+
+    // UIKeyCommand uses UIKit's repeated-action timer. Window transitions can
+    // cancel its key-up delivery, leaving a toggle command running indefinitely.
+    // Non-repeating actions run after a physical release, so UIKit has finished
+    // the press before the action can move its window to another macOS Space.
+    override public func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let remaining = presses.filter { nonRepeatingAction(for: $0) == nil }
+        if !remaining.isEmpty {
+            super.pressesBegan(remaining, with: event)
+        }
+    }
+
+    override public func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let actions = presses.compactMap { nonRepeatingAction(for: $0) }
+        let remaining = presses.filter { nonRepeatingAction(for: $0) == nil }
+        if !remaining.isEmpty {
+            super.pressesEnded(remaining, with: event)
+        }
+        // Finish UIKit's release dispatch before starting any window transition.
+        DispatchQueue.main.async {
+            actions.forEach { $0.action() }
+        }
+    }
+
+    private func nonRepeatingAction(for press: UIPress) -> KeyCommandAction? {
+        guard let key = press.key else { return nil }
+        return _keyCommandActions.first {
+            !$0.allowsRepeat && $0.input == key.charactersIgnoringModifiers && $0.modifierFlags == key.modifierFlags
+        }
     }
 
     // MARK: Orientation

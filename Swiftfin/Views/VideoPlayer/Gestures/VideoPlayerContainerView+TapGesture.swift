@@ -56,7 +56,7 @@ extension VideoPlayer.UIVideoPlayerContainerViewController {
 
         if count == 2 {
             if UIDevice.isMac {
-                MacWindowController.shared.toggleFullScreen()
+                MacWindowController.shared.togglePlayerFullScreen()
                 return
             }
 

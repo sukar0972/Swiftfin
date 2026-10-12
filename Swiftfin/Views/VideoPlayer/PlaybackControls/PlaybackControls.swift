@@ -106,7 +106,7 @@ extension VideoPlayer {
                         }
                     }
                     .onTapGesture(count: 2) {
-                        MacWindowController.shared.toggleFullScreen()
+                        MacWindowController.shared.togglePlayerFullScreen()
                     }
                     .onTapGesture {
                         containerState.isPresentingOverlay = false
@@ -117,7 +117,7 @@ extension VideoPlayer {
                         }
 
                         Button("Toggle Full Screen") {
-                            MacWindowController.shared.toggleFullScreen()
+                            MacWindowController.shared.togglePlayerFullScreen()
                         }
 
                         Button("Aspect Fill") {
