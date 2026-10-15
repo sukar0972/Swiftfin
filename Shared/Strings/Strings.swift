@@ -464,6 +464,8 @@ internal enum L10n {
   internal static let dayOfWeek = L10n.tr("Localizable", "dayOfWeek", fallback: "Day of week")
   /// Days
   internal static let days = L10n.tr("Localizable", "days", fallback: "Days")
+  /// Decrease playback speed
+  internal static let decreasePlaybackSpeed = L10n.tr("Localizable", "decreasePlaybackSpeed", fallback: "Decrease playback speed")
   /// Decrement
   internal static let decrement = L10n.tr("Localizable", "decrement", fallback: "Decrement")
   /// Default
@@ -802,6 +804,8 @@ internal enum L10n {
   internal static func incorrectPinForUser(_ p1: Any) -> String {
     return L10n.tr("Localizable", "incorrectPinForUser", String(describing: p1), fallback: "Incorrect pin for %@")
   }
+  /// Increase playback speed
+  internal static let increasePlaybackSpeed = L10n.tr("Localizable", "increasePlaybackSpeed", fallback: "Increase playback speed")
   /// Increment
   internal static let increment = L10n.tr("Localizable", "increment", fallback: "Increment")
   /// Index number
@@ -858,6 +862,18 @@ internal enum L10n {
   internal static let jumpForward = L10n.tr("Localizable", "jumpForward", fallback: "Jump forward")
   /// Jump forward length
   internal static let jumpForwardLength = L10n.tr("Localizable", "jumpForwardLength", fallback: "Jump forward length")
+  /// Already used by %@.
+  internal static func keyboardShortcutInUse(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "keyboardShortcutInUse", String(describing: p1), fallback: "Already used by %@.")
+  }
+  /// This shortcut opens Settings.
+  internal static let keyboardShortcutReserved = L10n.tr("Localizable", "keyboardShortcutReserved", fallback: "This shortcut opens Settings.")
+  /// Keyboard shortcuts
+  internal static let keyboardShortcuts = L10n.tr("Localizable", "keyboardShortcuts", fallback: "Keyboard shortcuts")
+  /// Select an action, then press the new shortcut.
+  internal static let keyboardShortcutsDescription = L10n.tr("Localizable", "keyboardShortcutsDescription", fallback: "Select an action, then press the new shortcut.")
+  /// Press the new shortcut. Select the action again to cancel.
+  internal static let keyboardShortcutsRecording = L10n.tr("Localizable", "keyboardShortcutsRecording", fallback: "Press the new shortcut. Select the action again to cancel.")
   /// Kids
   internal static let kids = L10n.tr("Localizable", "kids", fallback: "Kids")
   /// kbps
@@ -1226,6 +1242,8 @@ internal enum L10n {
   internal static let preferredLanguage = L10n.tr("Localizable", "preferredLanguage", fallback: "Preferred language")
   /// Premiere date
   internal static let premiereDate = L10n.tr("Localizable", "premiereDate", fallback: "Premiere date")
+  /// Press shortcut
+  internal static let pressShortcut = L10n.tr("Localizable", "pressShortcut", fallback: "Press shortcut")
   /// Preview
   internal static let preview = L10n.tr("Localizable", "preview", fallback: "Preview")
   /// Preview image
@@ -1360,6 +1378,8 @@ internal enum L10n {
   internal static let reset = L10n.tr("Localizable", "reset", fallback: "Reset")
   /// Reset the filter values to none.
   internal static let resetFilterFooter = L10n.tr("Localizable", "resetFilterFooter", fallback: "Reset the filter values to none.")
+  /// Reset playback speed
+  internal static let resetPlaybackSpeed = L10n.tr("Localizable", "resetPlaybackSpeed", fallback: "Reset playback speed")
   /// Reset settings
   internal static let resetSettings = L10n.tr("Localizable", "resetSettings", fallback: "Reset settings")
   /// Reset Swiftfin user settings.
@@ -1434,6 +1454,10 @@ internal enum L10n {
   internal static let security = L10n.tr("Localizable", "security", fallback: "Security")
   /// Seek
   internal static let seek = L10n.tr("Localizable", "seek", fallback: "Seek")
+  /// Seek backward
+  internal static let seekBackward = L10n.tr("Localizable", "seekBackward", fallback: "Seek backward")
+  /// Seek forward
+  internal static let seekForward = L10n.tr("Localizable", "seekForward", fallback: "Seek forward")
   /// See more
   internal static let seeMore = L10n.tr("Localizable", "seeMore", fallback: "See more")
   /// Select all
@@ -1664,6 +1688,12 @@ internal enum L10n {
   internal static let timestamp = L10n.tr("Localizable", "timestamp", fallback: "Timestamp")
   /// Title
   internal static let title = L10n.tr("Localizable", "title", fallback: "Title")
+  /// Toggle aspect fit / fill
+  internal static let toggleAspectFitFill = L10n.tr("Localizable", "toggleAspectFitFill", fallback: "Toggle aspect fit / fill")
+  /// Toggle fullscreen
+  internal static let toggleFullscreen = L10n.tr("Localizable", "toggleFullscreen", fallback: "Toggle fullscreen")
+  /// Toggle subtitles
+  internal static let toggleSubtitles = L10n.tr("Localizable", "toggleSubtitles", fallback: "Toggle subtitles")
   /// Total time
   internal static let totalTime = L10n.tr("Localizable", "totalTime", fallback: "Total time")
   /// Trailer

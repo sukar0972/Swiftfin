@@ -268,6 +268,10 @@ extension Defaults.Keys {
             UserKey("jumpForwardLength", default: .fifteen)
         }
 
+        static var keyboardShortcuts: Key<PlayerKeyboardShortcuts> {
+            UserKey("videoPlayerKeyboardShortcuts", default: .default)
+        }
+
         static var menuActionButtons: Key<[VideoPlayerActionButton]> {
             UserKey(
                 "menuActionButtons",

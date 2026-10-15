@@ -81,7 +81,7 @@ public class UIPreferencesHostingController: UIHostingController<AnyView> {
     @objc
     private func keyCommandHit(keyCommand: UIKeyCommand) {
         guard let action = _keyCommandActions
-            .first(where: { $0.input == keyCommand.input && $0.modifierFlags == keyCommand.modifierFlags }) else { return }
+            .first(where: { sameCommand($0, input: keyCommand.input, modifiers: keyCommand.modifierFlags) }) else { return }
         action.action()
     }
 
@@ -111,8 +111,20 @@ public class UIPreferencesHostingController: UIHostingController<AnyView> {
     private func nonRepeatingAction(for press: UIPress) -> KeyCommandAction? {
         guard let key = press.key else { return nil }
         return _keyCommandActions.first {
-            !$0.allowsRepeat && $0.input == key.charactersIgnoringModifiers && $0.modifierFlags == key.modifierFlags
+            !$0.allowsRepeat && sameCommand($0, input: key.charactersIgnoringModifiers, modifiers: key.modifierFlags)
         }
+    }
+
+    /// Caps Lock and the numeric pad bit are reported on some keys, including arrows.
+    /// Shortcut matching uses only the modifiers a person can assign.
+    private func sameCommand(
+        _ action: KeyCommandAction,
+        input: String?,
+        modifiers: UIKeyModifierFlags
+    ) -> Bool {
+        let relevant: UIKeyModifierFlags = [.command, .shift, .alternate, .control]
+        return action.input == input
+            && action.modifierFlags.intersection(relevant) == modifiers.intersection(relevant)
     }
 
     // MARK: Orientation

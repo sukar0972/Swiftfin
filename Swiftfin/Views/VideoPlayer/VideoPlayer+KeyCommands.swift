@@ -18,6 +18,8 @@ extension VideoPlayer {
         private var jumpBackwardInterval
         @Default(.VideoPlayer.jumpForwardInterval)
         private var jumpForwardInterval
+        @Default(.VideoPlayer.keyboardShortcuts)
+        private var keyboardShortcuts
 
         @EnvironmentObject
         private var containerState: VideoPlayerContainerState
@@ -37,11 +39,7 @@ extension VideoPlayer {
 
                     // MARK: Close Player
 
-                    KeyCommandAction(
-                        title: L10n.close,
-                        input: UIKeyCommand.inputEscape,
-                        allowsRepeat: false
-                    ) {
+                    keyCommand(.closePlayer) {
                         if UIDevice.isMac, MacWindowController.shared.handlePlayerEscape() {
                             return
                         }
@@ -52,11 +50,7 @@ extension VideoPlayer {
 
                     // MARK: Full Screen
 
-                    KeyCommandAction(
-                        title: "Toggle Full Screen",
-                        input: "f",
-                        allowsRepeat: false
-                    ) {
+                    keyCommand(.toggleFullscreen) {
                         MacWindowController.shared.togglePlayerFullScreen()
                     }
 
@@ -76,17 +70,11 @@ extension VideoPlayer {
 
                     // MARK: Aspect Fill
 
-                    KeyCommandAction(
-                        title: "Aspect Fill",
-                        input: "a"
-                    ) { @MainActor in
+                    keyCommand(.toggleAspectFill) { @MainActor in
                         containerState.isAspectFilled.toggle()
                     }
 
-                    KeyCommandAction(
-                        title: L10n.playAndPause,
-                        input: " "
-                    ) {
+                    keyCommand(.playPause) {
                         manager.togglePlayPause()
 
                         if !containerState.isPresentingOverlay {
@@ -104,13 +92,15 @@ extension VideoPlayer {
                         }
                     }
 
+                    // MARK: Subtitles
+
+                    keyCommand(.toggleSubtitles) {
+                        manager.playbackItem?.toggleSubtitles()
+                    }
+
                     // MARK: - Decrease Playback Speed
 
-                    KeyCommandAction(
-                        title: "Decrease Playback Speed",
-                        input: "[",
-                        modifierFlags: .command
-                    ) {
+                    keyCommand(.decreasePlaybackSpeed) {
                         let newRate = clamp(
                             manager.rate - 0.25,
                             min: 0.25,
@@ -127,11 +117,7 @@ extension VideoPlayer {
 
                     // MARK: - Increase Playback Speed
 
-                    KeyCommandAction(
-                        title: "Increase Playback Speed",
-                        input: "]",
-                        modifierFlags: .command
-                    ) {
+                    keyCommand(.increasePlaybackSpeed) {
                         let newRate = clamp(
                             manager.rate + 0.25,
                             min: 0.25,
@@ -148,11 +134,7 @@ extension VideoPlayer {
 
                     // MARK: Reset Playback Speed
 
-                    KeyCommandAction(
-                        title: "Reset Playback Speed",
-                        input: "\\",
-                        modifierFlags: .command
-                    ) {
+                    keyCommand(.resetPlaybackSpeed) {
                         manager.setRate(rate: 1)
                         toaster.present(
                             Text(1, format: .playbackRate),
@@ -162,32 +144,21 @@ extension VideoPlayer {
 
                     // MARK: Play Next Item
 
-                    KeyCommandAction(
-                        title: L10n.nextItem,
-                        input: UIKeyCommand.inputRightArrow,
-                        modifierFlags: .command
-                    ) {
+                    keyCommand(.nextItem) {
                         guard let nextItem = manager.queue?.nextItem else { return }
                         manager.playNewItem(provider: nextItem)
                     }
 
                     // MARK: Play Previous Item
 
-                    KeyCommandAction(
-                        title: L10n.previousItem,
-                        input: UIKeyCommand.inputLeftArrow,
-                        modifierFlags: .command
-                    ) {
+                    keyCommand(.previousItem) {
                         guard let previousItem = manager.queue?.previousItem else { return }
                         manager.playNewItem(provider: previousItem)
                     }
 
                     // MARK: - Jump Backward
 
-                    KeyCommandAction(
-                        title: L10n.jumpBackward,
-                        input: UIKeyCommand.inputLeftArrow
-                    ) {
+                    keyCommand(.seekBackward) {
                         containerState.jumpProgressObserver.jumpBackward()
                         manager.proxy?.jumpBackward(jumpBackwardInterval.rawValue)
 
@@ -202,10 +173,7 @@ extension VideoPlayer {
 
                     // MARK: - Jump Forward
 
-                    KeyCommandAction(
-                        title: L10n.jumpForward,
-                        input: UIKeyCommand.inputRightArrow
-                    ) {
+                    keyCommand(.seekForward) {
                         containerState.jumpProgressObserver.jumpForward()
                         manager.proxy?.jumpForward(jumpForwardInterval.rawValue)
 
@@ -218,6 +186,20 @@ extension VideoPlayer {
                         )
                     }
                 }
+        }
+
+        private func keyCommand(
+            _ action: PlayerKeyAction,
+            perform: @escaping () -> Void
+        ) -> KeyCommandAction {
+            let chord = keyboardShortcuts[action]
+            return KeyCommandAction(
+                title: action.title,
+                input: chord.input,
+                modifierFlags: chord.modifierFlags,
+                allowsRepeat: action.allowsRepeat,
+                action: perform
+            )
         }
     }
 }

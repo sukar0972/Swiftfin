@@ -32,6 +32,9 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
     var selectedSubtitleStreamIndex: Int? = nil {
         didSet {
             guard selectedSubtitleStreamIndex != oldValue else { return }
+            if let index = selectedSubtitleStreamIndex, index >= 0 {
+                lastEnabledSubtitleStreamIndex = index
+            }
             manager?.setTrack(type: .subtitle, from: oldValue, to: selectedSubtitleStreamIndex)
         }
     }
@@ -39,6 +42,7 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
     private(set) var indexMap: MediaTrackIndexMap
 
     private var externalSubtitlesResolved = false
+    private var lastEnabledSubtitleStreamIndex: Int?
 
     weak var manager: MediaPlayerManager? {
         didSet {
@@ -120,6 +124,23 @@ class MediaPlayerItem: ViewModel, MediaPlayerObserver {
             ?? -1
 
         observers.append(MediaProgressObserver(item: self))
+    }
+
+    /// Restores the last selected track, or chooses a default when subtitles started disabled.
+    func toggleSubtitles() {
+        if let index = selectedSubtitleStreamIndex, index >= 0 {
+            lastEnabledSubtitleStreamIndex = index
+            selectedSubtitleStreamIndex = -1
+            return
+        }
+
+        let preferredIndex = [lastEnabledSubtitleStreamIndex, mediaSource.defaultSubtitleStreamIndex]
+            .compactMap(\.self)
+            .first { index in
+                index >= 0 && subtitleStreams.contains { $0.index == index }
+            }
+        guard let index = preferredIndex ?? subtitleStreams.compactMap(\.index).first(where: { $0 >= 0 }) else { return }
+        selectedSubtitleStreamIndex = index
     }
 
     /// Decides whether a track change can be performed by the player in place, or whether the server must produce a new stream.

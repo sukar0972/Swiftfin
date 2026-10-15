@@ -172,6 +172,14 @@ extension NavigationRoute {
     }
     #endif
 
+    static var keyboardShortcutSettings: NavigationRoute {
+        NavigationRoute(
+            id: "keyboardShortcutSettings"
+        ) {
+            KeyboardShortcutSettingsView()
+        }
+    }
+
     static let itemSettings = NavigationRoute(
         id: "itemSettings"
     ) {

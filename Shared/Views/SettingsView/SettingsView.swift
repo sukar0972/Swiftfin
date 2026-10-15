@@ -44,6 +44,22 @@ struct SettingsView: View {
         .navigationBarCloseButton {
             router.dismiss()
         }
+        .toolbar {
+            if UIDevice.isMac {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        router.dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .fontWeight(.bold)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(accentColor.overlayColor, accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L10n.close)
+                }
+            }
+        }
         #endif
     }
 
@@ -120,6 +136,10 @@ struct SettingsView: View {
 
             ChevronButton(L10n.playbackQuality) {
                 router.route(to: .playbackQualitySettings)
+            }
+
+            ChevronButton(L10n.keyboardShortcuts) {
+                router.route(to: .keyboardShortcutSettings)
             }
         }
     }

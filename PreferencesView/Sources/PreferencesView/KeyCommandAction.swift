@@ -38,5 +38,8 @@ extension KeyCommandAction: Equatable {
 
     public static func == (lhs: KeyCommandAction, rhs: KeyCommandAction) -> Bool {
         lhs.input == rhs.input
+            && lhs.modifierFlags == rhs.modifierFlags
+            && lhs.allowsRepeat == rhs.allowsRepeat
+            && lhs.title == rhs.title
     }
 }
